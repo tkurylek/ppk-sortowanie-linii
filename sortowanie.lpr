@@ -4,7 +4,7 @@ uses
   SysUtils;
 
 const
-  MAKSYMALNA_ILOSC_WIERSZY := 1000;
+  MAKSYMALNA_ILOSC_WIERSZY = 1000;
 
 type
   WierszePliku = array[1..MAKSYMALNA_ILOSC_WIERSZY] of string;
@@ -71,7 +71,7 @@ type
     repeat
       ReadLn(plik, odczytaneWiersze[i]);
       Inc(i);
-    until EOF(plik) or (i >= High(odczytaneWiersze));
+    until (EOF(plik) or (i >= MAKSYMALNA_ILOSC_WIERSZY));
     Close(plik);
     pobierzWierszeZPliku := odczytaneWiersze;
   end;
@@ -81,17 +81,64 @@ type
   var
     plik: Text;
     i: integer;
+    iloscWierszyDoZapisu: integer;
   begin
     i := 1;
+    iloscWierszyDoZapisu := High(wierszeDoZapisu);
+    Assign(plik, sciezkaDoPliku);
+    Rewrite(plik);
+    repeat
+      WriteLn(plik, wierszeDoZapisu[i]);
+      Inc(i);
+    until i >= iloscWierszyDoZapisu;
+    Close(plik);
+  end;
+
+  function pobierzDlugoscNajkrotszegoCiagu(ciagA: string; ciagB: string): integer;
+  begin
+    if (Length(ciagA) < Length(ciagB)) then
+      pobierzDlugoscNajkrotszegoCiagu := Length(ciagA)
+    else
+      pobierzDlugoscNajkrotszegoCiagu := Length(ciagB);
+  end;
+
+  function sortujWiersze(wiersze: WierszePliku): WierszePliku;
+  var
+    i, j, dlugoscNajkrotszegoWiersza: integer;
+    pom: string;
+    wystapilaZamiana: boolean;
+  begin
+    dlugoscNajkrotszegoWiersza := 0;
+    repeat
+      wystapilaZamiana := False;
+      for i := 1 to High(wiersze) - 1 do
+      begin
+        dlugoscNajkrotszegoWiersza :=
+          pobierzDlugoscNajkrotszegoCiagu(wiersze[i], wiersze[i + 1]);
+        for j := 1 to dlugoscNajkrotszegoWiersza do
+        begin
+          if wiersze[i][j] > wiersze[i + 1][j] then
+          begin
+            pom := wiersze[i];
+            wiersze[i] := wiersze[i + 1];
+            wiersze[i + 1] := pom;
+            wystapilaZamiana := True;
+          end;
+          if wiersze[i][j] <> wiersze[i + 1][j] then
+            Break;
+        end;
+      end;
+    until wystapilaZamiana = False;
+
+    sortujWiersze := wiersze;
   end;
 
 var
   plikZNieposortowanymiWierszami: Text;
   sciezkaDoPlikuZNieposortowanymiWierszami: string;
   nieposortowaneWiersze: WierszePliku;
+  posortowaneWiersze: WierszePliku;
 
-  // TODO: usun zmienna
-  i: integer;
 begin
   sciezkaDoPlikuZNieposortowanymiWierszami :=
     pobierzSciezkeDoPlikuOdUzytkownika(
@@ -100,11 +147,10 @@ begin
   nieposortowaneWiersze := pobierzWierszeZPliku(
     sciezkaDoPlikuZNieposortowanymiWierszami);
 
-  // TODO: usun petle
-  for i := 1 to 10 do
-  begin
-    writeln(nieposortowaneWiersze[i][1]);
-  end;
+  posortowaneWiersze := sortujWiersze(nieposortowaneWiersze);
 
+  zapiszWierszeDoPliku('output.txt', posortowaneWiersze);
+
+  writeln('Zakonczono poprawnie.');
   readln();
 end.
