@@ -43,7 +43,7 @@ type
     repeat
       pobranaSciezka := pobierzDaneOdUzytkownika(komunikatDlaUzytkownika);
       plikIstnieje := FileExists(pobranaSciezka);
-      if plikIstnieje = False then
+      if not plikIstnieje then
         writeln('Podana sciezka jest nieprawidlowa!');
     until plikIstnieje;
     pobierzSciezkeDoPlikuOdUzytkownika := pobranaSciezka;
@@ -184,9 +184,35 @@ type
     sortujWiersze := wiersze;
   end;
 
+{ trymujWiersze
+   Trymuje (usuwa puste) wiersze w podanych wierszach.
+ Argumenty:
+   wiersze:WierszePliku - zbior wierszy z jakich maja zostac usuniete puste wiersze.
+ Zwraca:
+   Wytrymowane wiersze.
+}
+  function trymujWiersze(wiersze: WierszePliku): WierszePliku;
+  var
+    indeks, indeksWytrymowanych: integer;
+    wytrymowaneWiersze: WierszePliku;
+  begin
+    indeksWytrymowanych := 1;
+    for indeks := 1 to High(wiersze) do
+      if Length(wiersze[indeks]) > 0 then
+      begin
+        wytrymowaneWiersze[indeksWytrymowanych] := wiersze[indeks];
+        Inc(indeksWytrymowanych);
+      end;
+    trymujWiersze := wytrymowaneWiersze;
+  end;
+
 var
   plikZNieposortowanymiWierszami: Text;
+  plikZPosortowanymiWierszami: Text;
+
   sciezkaDoPlikuZNieposortowanymiWierszami: string;
+  sciezkaDoPlikuZPosortowanymiWierszami: string;
+
   nieposortowaneWiersze: WierszePliku;
   posortowaneWiersze: WierszePliku;
 
@@ -194,9 +220,13 @@ begin
   sciezkaDoPlikuZNieposortowanymiWierszami :=
     pobierzSciezkeDoPlikuOdUzytkownika('Prosze podac poprawna sciezke do pliku z nieposortowanymi danymi');
   nieposortowaneWiersze := pobierzWierszeZPliku(sciezkaDoPlikuZNieposortowanymiWierszami);
-  posortowaneWiersze := sortujWiersze(nieposortowaneWiersze);
-  zapiszWierszeDoPliku('output.txt', posortowaneWiersze);
 
-  writeln('Zakonczono poprawnie.');
+  posortowaneWiersze := sortujWiersze(trymujWiersze(nieposortowaneWiersze));
+
+  sciezkaDoPlikuZPosortowanymiWierszami :=
+    pobierzDaneOdUzytkownika('Prosze podac nazwe pliku do ktorego beda zapisane posortowane dane');
+  zapiszWierszeDoPliku(sciezkaDoPlikuZPosortowanymiWierszami, posortowaneWiersze);
+
+  writeln('Zapisano poprawnie. Nacisnij enter, aby zakonczyc.');
   readln();
 end.
