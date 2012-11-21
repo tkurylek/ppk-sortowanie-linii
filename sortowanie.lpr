@@ -75,7 +75,15 @@ type
     pobierzWierszeZPliku := odczytaneWiersze;
   end;
 
-  function zapiszWierszeDoPliku(sciezkaDoPliku: string; wierszeDoZapisu: WierszePliku): boolean;
+{ zapiszWierszeDoPliku
+   Zapisuje podane wiersze do pliku o podanej sciezce. Maksymalna ilosc wierszy jaka
+   moze byc zapisana do pliku wynosi 1000.
+ Argumenty:
+   sciezkaDoPliku:string - sciezka do pliku w ktorym znajda sie wiersze do
+                         zapisu
+   wierszeDoZapisu:WierszePliku - wiersze ktore maja sie znalezc w pliku
+}
+  procedure zapiszWierszeDoPliku(sciezkaDoPliku: string; wierszeDoZapisu: WierszePliku);
   var
     plik: Text;
     i: integer;
@@ -92,6 +100,14 @@ type
     Close(plik);
   end;
 
+{ podajDlugoscKrotszegoCiagu
+   Porownuje podane ciagi i zwraca dlugosc (Length) krotszego z nich.
+ Argumenty:
+   ciagA:string - dowolny ciag znakow
+   ciagB:string - dowolny ciag znakow
+ Zwraca:
+   Dlugosc (Length) krotszego ciagu.
+}
   function podajDlugoscKrotszegoCiagu(ciagA: string; ciagB: string): integer;
   begin
     if (Length(ciagA) < Length(ciagB)) then
@@ -100,24 +116,45 @@ type
       podajDlugoscKrotszegoCiagu := Length(ciagB);
   end;
 
-  function pobierzLitereZWiersza(pozycjaLitery: integer; wiersz: string): char;
+{ pobierzLitereZCiagu
+   Pobiera litere o podanej pozycji z podanego ciagu.
+ Argumenty:
+   pozycjaLitery:integer - pozycja na ktorej znajduje sie litera w ciagu
+   ciag:string - dowolny ciag znakow
+ Zwraca:
+   Litera ktora znajduje sie na pozycji pozycjaLitery w ciagu 'ciag'.
+}
+  function pobierzLitereZCiagu(pozycjaLitery: integer; ciag: string): char;
   begin
-    pobierzLitereZWiersza := upcase(wiersz[pozycjaLitery]);
+    pobierzLitereZCiagu := upcase(ciag[pozycjaLitery]);
   end;
 
+{ sortujWiersze
+   Sortuje (babelkowo) podane wiersze.
+ Argumenty:
+   wiersze:WierszePliku - wiersze jakie maja zostac posortowane.
+ Zwraca:
+   Posortowane wiersze.
+}
   function sortujWiersze(wiersze: WierszePliku): WierszePliku;
   var
     aktualny, nastepny, pozycjaLitery, przedostatniWiersz, dlugoscKrotszegoWiersza: integer;
     literaWierszaAktualnego, literaWierszaNastepnego: char;
     wystapilaZamiana: boolean;
 
+    { zamienWiersze
+       Zamienia dwa wiersze o podanych indeksach miejscami.
+     Argumenty:
+       indeksWierszaA:integer - dowolny indeks wiersza w tablicy 'wiersze'.
+       indeksWierszaB:integer - dowolny indeks wiersza w tablicy 'wiersze'.
+    }
     procedure zamienWiersze(indeksWierszaA: integer; indeksWierszaB: integer);
     var
-      pom: string;
+      wierszPomocniczy: string;
     begin
-      pom := wiersze[indeksWierszaA];
+      wierszPomocniczy := wiersze[indeksWierszaA];
       wiersze[indeksWierszaA] := wiersze[indeksWierszaB];
-      wiersze[indeksWierszaB] := pom;
+      wiersze[indeksWierszaB] := wierszPomocniczy;
     end;
 
   begin
@@ -131,8 +168,8 @@ type
 
         for pozycjaLitery := 1 to dlugoscKrotszegoWiersza do
         begin
-          literaWierszaAktualnego := pobierzLitereZWiersza(pozycjaLitery, wiersze[aktualny]);
-          literaWierszaNastepnego := pobierzLitereZWiersza(pozycjaLitery, wiersze[nastepny]);
+          literaWierszaAktualnego := pobierzLitereZCiagu(pozycjaLitery, wiersze[aktualny]);
+          literaWierszaNastepnego := pobierzLitereZCiagu(pozycjaLitery, wiersze[nastepny]);
           if literaWierszaAktualnego > literaWierszaNastepnego then
           begin
             zamienWiersze(aktualny, nastepny);
@@ -156,14 +193,8 @@ var
 begin
   sciezkaDoPlikuZNieposortowanymiWierszami :=
     pobierzSciezkeDoPlikuOdUzytkownika('Prosze podac poprawna sciezke do pliku z nieposortowanymi danymi');
-
   nieposortowaneWiersze := pobierzWierszeZPliku(sciezkaDoPlikuZNieposortowanymiWierszami);
-
-
-
-
   posortowaneWiersze := sortujWiersze(nieposortowaneWiersze);
-
   zapiszWierszeDoPliku('output.txt', posortowaneWiersze);
 
   writeln('Zakonczono poprawnie.');
