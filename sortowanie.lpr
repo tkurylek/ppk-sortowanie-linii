@@ -94,7 +94,8 @@ type
     Assign(plik, sciezkaDoPliku);
     Rewrite(plik);
     repeat
-      WriteLn(plik, wierszeDoZapisu[i]);
+      if (Length(wierszeDoZapisu[i]) > 0) then
+        WriteLn(plik, wierszeDoZapisu[i]);
       Inc(i);
     until i >= iloscWierszyDoZapisu;
     Close(plik);
