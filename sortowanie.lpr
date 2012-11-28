@@ -61,7 +61,7 @@ type
   function jestPoprawnaNazwaPliku(nazwaPliku: string): boolean;
   var
     i: integer;
-    niedozwoloneZnaki: array[1..7] of char = ('*', ':', '?', '"', '<', '>', '|');
+    niedozwoloneZnaki: array[1..9] of char = ('*', ':', '?', '"', '<', '>', '|', '/', '\');
     nazwaZawieraNiedozwoloneZnaki: boolean;
   begin
     nazwaZawieraNiedozwoloneZnaki := False;
