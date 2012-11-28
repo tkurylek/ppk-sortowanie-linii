@@ -26,7 +26,7 @@ type
     pobierzDaneOdUzytkownika := pobraneDane;
   end;
 
-{ pobierzSciezkeDoPlikuOdUzytkownika
+{ pobierzSciezkeDoIstniejacegoPlikuOdUzytkownika
    Pobiera _poprawna_ sciezke do pliku wpisana przez uzytkownika wyswietlajac
    podany komunikat. Poprawna sciezka to taka, ktora wskazuje na istiejacy plik.
  Argumenty:
@@ -35,7 +35,7 @@ type
  Zwraca:
    Poprawna sciezka do pliku podana przez uzytkownika.
 }
-  function pobierzSciezkeDoPlikuOdUzytkownika(komunikatDlaUzytkownika: string): string;
+  function pobierzSciezkeDoIstniejacegoPlikuOdUzytkownika(komunikatDlaUzytkownika: string): string;
   var
     pobranaSciezka: string;
     plikIstnieje: boolean;
@@ -46,7 +46,57 @@ type
       if not plikIstnieje then
         writeln('Podana sciezka jest nieprawidlowa!');
     until plikIstnieje;
-    pobierzSciezkeDoPlikuOdUzytkownika := pobranaSciezka;
+    pobierzSciezkeDoIstniejacegoPlikuOdUzytkownika := pobranaSciezka;
+  end;
+
+{ jestPoprawnaNazwaPliku
+   Sprawdza czy podana nazwa pliku jest poprawna i czy mozna jej uzyc do
+   stworzenia pliku.
+ Argumenty:
+   nazwaPliku:string - nazwa pliku jaka powinna byc poddana weryfikacji.
+ Zwraca:
+   True - jezeli plik o podanej nazwie moze zostac stworzony;
+   False - jezeli plik o podanej nazwie NIE moze zostac stworzony.
+}
+  function jestPoprawnaNazwaPliku(nazwaPliku: string): boolean;
+  var
+    i: integer;
+    niedozwoloneZnaki: array[1..7] of char = ('*', ':', '?', '"', '<', '>', '|');
+    nazwaZawieraNiedozwoloneZnaki: boolean;
+  begin
+    nazwaZawieraNiedozwoloneZnaki := False;
+    for i := 1 to High(niedozwoloneZnaki) do
+    begin
+      if pos(niedozwoloneZnaki[i], nazwaPliku) <> 0 then
+      begin
+        nazwaZawieraNiedozwoloneZnaki := True;
+        break;
+      end;
+    end;
+    jestPoprawnaNazwaPliku := not nazwaZawieraNiedozwoloneZnaki;
+  end;
+
+{ pobierzNazwePlikuOdUzytkownika
+   Pobiera _poprawna_ nazwe pliku wpisana przez uzytkownika wyswietlajac
+   podany komunikat. Nazwa pliku nie moze zawierac znakow : * ? " < > |
+ Argumenty:
+   komunikatDlaUzytkownika:string - komunikat jaki ma zostac wyswietlony
+                                  uzytkownikowi przed pobraniem danych.
+ Zwraca:
+   Poprawna nazwa pliku podana przez uzytkownika.
+}
+  function pobierzNazwePlikuOdUzytkownika(komunikatDlaUzytkownika: string): string;
+  var
+    pobranaNazwa: string;
+    nazwaJestPoprawna: boolean;
+  begin
+    repeat
+      pobranaNazwa := pobierzDaneOdUzytkownika(komunikatDlaUzytkownika);
+      nazwaJestPoprawna := jestPoprawnaNazwaPliku(pobranaNazwa);
+      if not nazwaJestPoprawna then
+        writeln('Podana nazwa jest nieprawidlowa. Zawiera niedozwolone znaki!');
+    until nazwaJestPoprawna;
+    pobierzNazwePlikuOdUzytkownika := pobranaNazwa;
   end;
 
 { pobierzWierszeZPliku
@@ -219,13 +269,13 @@ var
 
 begin
   sciezkaDoPlikuZNieposortowanymiWierszami :=
-    pobierzSciezkeDoPlikuOdUzytkownika('Prosze podac poprawna sciezke do pliku z nieposortowanymi danymi');
+    pobierzSciezkeDoIstniejacegoPlikuOdUzytkownika('Prosze podac poprawna sciezke do pliku z nieposortowanymi danymi');
   nieposortowaneWiersze := pobierzWierszeZPliku(sciezkaDoPlikuZNieposortowanymiWierszami);
 
   posortowaneWiersze := sortujWiersze(trymujWiersze(nieposortowaneWiersze));
 
   sciezkaDoPlikuZPosortowanymiWierszami :=
-    pobierzDaneOdUzytkownika('Prosze podac nazwe pliku do ktorego beda zapisane posortowane dane');
+    pobierzNazwePlikuOdUzytkownika('Prosze podac nazwe pliku do ktorego beda zapisane posortowane dane');
   zapiszWierszeDoPliku(sciezkaDoPlikuZPosortowanymiWierszami, posortowaneWiersze);
 
   writeln('Zapisano poprawnie. Nacisnij enter, aby zakonczyc.');
