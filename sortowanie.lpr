@@ -7,7 +7,7 @@ const
   MAKSYMALNA_ILOSC_WIERSZY = 1000;
 
 type
-  WierszePliku = array[1..MAKSYMALNA_ILOSC_WIERSZY] of string;
+  WierszePliku = array[1..MAKSYMALNA_ILOSC_WIERSZY] of AnsiString;
 
 { pobierzDaneOdUzytkownika
    Pobiera dane wpisane przez uzytkownika wyswietlajac podany komunikat.
@@ -79,6 +79,7 @@ type
 { pobierzNazwePlikuOdUzytkownika
    Pobiera _poprawna_ nazwe pliku wpisana przez uzytkownika wyswietlajac
    podany komunikat. Nazwa pliku nie moze zawierac znakow : * ? " < > |
+   Zobacz takze: jestPoprawnaNazwaPliku
  Argumenty:
    komunikatDlaUzytkownika:string - komunikat jaki ma zostac wyswietlony
                                   uzytkownikowi przed pobraniem danych.
@@ -222,6 +223,13 @@ type
           literaWierszaAktualnego := pobierzLitereZCiagu(pozycjaLitery, wiersze[aktualny]);
           literaWierszaNastepnego := pobierzLitereZCiagu(pozycjaLitery, wiersze[nastepny]);
           if literaWierszaAktualnego > literaWierszaNastepnego then
+          begin
+            zamienWiersze(aktualny, nastepny);
+            wystapilaZamiana := True;
+          end;
+          if (literaWierszaNastepnego = literaWierszaAktualnego)
+          and (pozycjaLitery = dlugoscKrotszegoWiersza)
+          and (Length(wiersze[aktualny]) > Length(wiersze[nastepny])) then
           begin
             zamienWiersze(aktualny, nastepny);
             wystapilaZamiana := True;
